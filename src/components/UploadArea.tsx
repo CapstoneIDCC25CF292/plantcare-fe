@@ -50,23 +50,56 @@ export default function UploadArea() {
 
         const token = localStorage.getItem("token");
         if (!token) {
-            toast.error("No token available, please login again!");
+            toast.error("No token available, please login!");
             return;
         }
 
         try {
             setLoading(true);
-            const response = await axios.post('https://plantcare.up.railway.app/api/predict', formData, {
-                headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${token}` },
-            });
+            const response = await axios.post(
+                'https://plantcare.up.railway.app/api/predict',
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${token}`
+                    },
+                }
+            );
             navigate(`/history/${response.data.data.id}`);
-        } catch (err) {
-            console.error(err);
-            alert("Failed to upload image.");
+        } catch (err: any) {
+            if (err.response) {
+                const status = err.response.status;
+                const message = err.response.data || "Something went wrong.";
+
+                switch (status) {
+                    case 400:
+                        toast.error(`Bad Request: ${message}`);
+                        break;
+                    case 401:
+                        toast.error("Unauthorized: Please log in again.");
+                        break;
+                    case 403:
+                        toast.error("Forbidden: You don't have permission.");
+                        break;
+                    case 500:
+                        toast.error("Server error. Please try again later.");
+                        break;
+                    default:
+                        toast.error(`Error ${status}: ${message}`);
+                }
+            } else if (err.request) {
+                // Request was made but no response received
+                toast.error("No response from server. Please check your internet connection.");
+            } else {
+                // Something else happened
+                toast.error(`Error: ${err.message}`);
+            }
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div>

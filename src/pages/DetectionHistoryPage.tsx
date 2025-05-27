@@ -14,7 +14,7 @@ export default function DetectionHistoryPage() {
             try {
                 const token = localStorage.getItem("token");
                 if (!token) {
-                    toast.error("No token available, please login again!");
+                    toast.error("No token available, please login!");
                     return;
                 }
 

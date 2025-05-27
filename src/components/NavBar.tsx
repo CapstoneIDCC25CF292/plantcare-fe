@@ -2,16 +2,14 @@ import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Menu, X } from 'lucide-react'; // pastikan install: npm install lucide-react
+import { Menu, X } from 'lucide-react';
 
 export default function NavBar() {
-    const [user, setUser] = useState({
-        email: "",
-        username: ""
-    });
+    const [user, setUser] = useState({ email: '', username: '' });
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate(); // ← pindah ke atas, sebelum digunakan
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -25,39 +23,42 @@ export default function NavBar() {
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
     }, []);
-
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUser = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) {
-                    toast.error("No token available, please login again!");
-                    return;
-                }
+            const token = localStorage.getItem("token");
+            if (!token) {
+                navigate('/auth/login');
+                return;
+            }
 
+            try {
                 const response = await axios.get("https://plantcare.up.railway.app/api/auth/me", {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
-
                 setUser(response.data.data);
-            } catch (err: any) {
-                if (err.response?.status == 403) {
-                    navigate('/auth/login');
-                    toast.error("Token invalid, please login again");
-                    return;
+            } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    if (error.response?.status === 403) {
+                        toast.error("Token invalid, please login!");
+                        navigate('/auth/login');
+                    } else {
+                        toast.error(error.response?.data?.message || "Failed to fetch user.");
+                    }
                 } else {
-                    toast.error(err.response?.data?.message || "Failed to fetch user.");
+                    toast.error("An unexpected error occurred.");
                 }
             }
         };
+
         fetchUser();
-    }, []);
+    }, [navigate]);
 
     return (
         <nav className='sticky top-0 z-50 bg-white border-b border-b-gray-200 px-5 py-3'>

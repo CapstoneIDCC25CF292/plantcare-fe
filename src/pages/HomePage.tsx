@@ -15,33 +15,11 @@ export default function HomePage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) {
-                    toast.error("No token available, please login again!");
-                    return;
-                }
-
-                const response = await axios.get("https://plantcare.up.railway.app/api/auth/me", {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                setUser(response.data.data);
-            } catch (err: any) {
-                toast.error(err.response?.data?.message || "Failed to fetch user.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
         const fetchHistoryDetection = async () => {
             try {
                 const token = localStorage.getItem("token");
                 if (!token) {
-                    toast.error("No token available, please login again!");
+                    toast.error("No token available, please login!");
                     return;
                 }
 
@@ -60,7 +38,6 @@ export default function HomePage() {
         };
 
         fetchHistoryDetection();
-        fetchUser();
     }, []);
 
     if (loading) {
