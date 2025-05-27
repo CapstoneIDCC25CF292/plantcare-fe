@@ -7,10 +7,6 @@ import { Link } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 
 export default function HomePage() {
-    const [user, setUser] = useState({
-        email: "",
-        username: ""
-    });
     const [historyPredicts, setHistoryPredicts] = useState<HistoryPredict[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -52,7 +48,7 @@ export default function HomePage() {
             <div className='p-5'>
                 <div>
                     <div className='font-medium text-3xl'>
-                        Welcome back, {user.username}
+                        Welcome back,
                     </div>
                     <div className='text-lg'>
                         Let's check your plant's health today
